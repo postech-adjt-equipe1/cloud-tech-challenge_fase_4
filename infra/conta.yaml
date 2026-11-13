@@ -12,7 +12,7 @@ Description: >
 Parameters:
   RepositorioGitHub:
     Type: String
-    Default: Igolbr/cloud-tech-challenge_fase_4
+    Default: postech-adjt-equipe1/cloud-tech-challenge_fase_4
     Description: Repositório (dono/nome) autorizado a implantar pela AWS.
     AllowedPattern: "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
   AmbienteGitHub:

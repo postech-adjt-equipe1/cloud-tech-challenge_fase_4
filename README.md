@@ -396,7 +396,7 @@ mvn -version
 ### 2. Baixar o projeto e rodar os testes
 
 ```bash
-git clone https://github.com/Igolbr/cloud-tech-challenge_fase_4.git
+git clone https://github.com/postech-adjt-equipe1/cloud-tech-challenge_fase_4.git
 cd cloud-tech-challenge_fase_4
 mvn verify
 ```
