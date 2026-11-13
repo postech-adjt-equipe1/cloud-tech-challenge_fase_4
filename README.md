@@ -482,25 +482,27 @@ O workflow [.github/workflows/deploy.yml](.github/workflows/deploy.yml):
 
 Para ele funcionar, cadastre no repositório (**Settings > Secrets and variables > Actions**):
 
+O workflow entra na AWS por OIDC: o GitHub troca um token temporário pelo papel criado no `infra/conta.yaml`,
+e nenhuma chave da AWS fica guardada no repositório. Antes do primeiro deploy pelo Actions:
+
+1. Implante uma vez o `infra/conta.yaml` com um usuário administrador, informando o repositório
+   (comando em [docs/monitoramento-e-seguranca.md](docs/monitoramento-e-seguranca.md#passo-a-passo-de-configuração)).
+2. Cadastre no repositório (**Settings > Secrets and variables > Actions**):
+
 | Tipo | Nome | Valor |
 |---|---|---|
-| Secret | `AWS_ACCESS_KEY_ID` | Chave do usuário de deploy |
-| Secret | `AWS_SECRET_ACCESS_KEY` | Segredo do usuário de deploy |
+| Variable | `AWS_ROLE_ARN` | Output `PapelDeployGitHubArn` do `infra/conta.yaml` |
+| Variable | `AWS_CFN_EXEC_ROLE_ARN` | Output `PapelExecucaoCloudFormationArn` |
+| Variable | `AWS_ARTIFACTS_BUCKET` | Output `BucketArtefatosNome` |
 | Secret | `EMAIL_ADMINISTRADOR` | E-mail que recebe os avisos e o relatório |
 | Secret (opcional) | `EMAIL_ALERTAS` | E-mail dos alarmes técnicos (padrão: o mesmo do administrador) |
 | Variable (opcional) | `AWS_REGION` | Região (padrão `us-east-1`) |
 | Variable (opcional) | `LIMITE_ORCAMENTO_USD` | Limite do alerta de orçamento mensal (padrão 10; 0 desliga) |
-| Variables (OIDC) | `AWS_ROLE_ARN`, `AWS_CFN_EXEC_ROLE_ARN`, `AWS_ARTIFACTS_BUCKET` | Outputs do `infra/conta.yaml`; com elas o deploy dispensa as chaves de acesso |
 
 Depois disso, qualquer push na `main` atualiza as funções sem passo manual. O andamento aparece na aba **Actions** do GitHub.
 
-### 8. (Opcional) Deploy sem chave de acesso, por OIDC
-
-Para não guardar chave da AWS no GitHub, implante uma vez o `infra/conta.yaml` com um usuário administrador
-e cadastre os três outputs como variables (`AWS_ROLE_ARN`, `AWS_CFN_EXEC_ROLE_ARN`, `AWS_ARTIFACTS_BUCKET`).
-O workflow passa a usar OIDC sozinho e os secrets `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` podem ser apagados.
-O passo a passo completo, junto com MFA, usuários nominais e CloudTrail, está em
-[docs/monitoramento-e-seguranca.md](docs/monitoramento-e-seguranca.md#passo-a-passo-de-configuração).
+Sem a variable `AWS_ROLE_ARN`, o workflow tenta os secrets `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` de um
+usuário de deploy. Essa opção existe para contas onde o `infra/conta.yaml` não pode ser implantado; nós não a usamos.
 
 ### Remover o ambiente
 
@@ -523,7 +525,9 @@ Apaga funções, API, User Pool (com os alunos cadastrados), tabela (com as aval
 | `cadastrar-aluno.sh` falha com `InvalidPasswordException` | A senha precisa de 12 caracteres, com maiúscula, minúscula e número |
 | API responde `429` | Limite de requisições atingido; espere alguns segundos |
 | Relatório veio vazio | As avaliações foram enviadas no mesmo dia da execução; elas entram no relatório seguinte |
-| Pipeline falha em "Credenciais AWS" | Secrets `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` (ou as variables do OIDC) não cadastrados |
+| Pipeline falha com `Credentials could not be loaded` | Variable `AWS_ROLE_ARN` não cadastrada; sem ela o workflow cai na opção de chave de acesso, que não está configurada |
+| Pipeline falha em "Credenciais AWS (OIDC)" com `Not authorized to perform sts:AssumeRoleWithWebIdentity` | O `infra/conta.yaml` foi implantado com outro `RepositorioGitHub`. Repositórios criados recentemente mandam o `sub` com IDs (`repo:dono@123/nome@456:...`); a versão atual do template aceita os dois formatos |
+| `sam deploy` no Actions falha com `not authorized to perform: cloudformation:CreateChangeSet on resource: ...transform/Serverless-2016-10-31` | Pilha `plataforma-feedback-conta` desatualizada: reimplante o `infra/conta.yaml` (o papel do CloudFormation precisa processar o transform do SAM) |
 
 ## Testando com o Postman
 

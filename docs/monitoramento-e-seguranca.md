@@ -132,9 +132,9 @@ O [infra/conta.yaml](../infra/conta.yaml) cria:
   Esse papel só gerencia papéis IAM das pilhas da aplicação, então não consegue alterar os próprios papéis de deploy.
 - O bucket de pacotes do SAM (criptografado, privado, apaga pacotes com mais de 30 dias).
 
-Enquanto a variável `AWS_ROLE_ARN` não estiver cadastrada, o workflow continua usando o usuário de deploy
-com chaves nos segredos (modo atual). Depois de cadastrada, as chaves podem ser apagadas do GitHub e
-desativadas no IAM.
+É assim que o deploy do projeto roda: o GitHub não guarda nenhuma chave da AWS. Só sem a variável
+`AWS_ROLE_ARN` o workflow recorreria a um usuário de deploy com chaves nos segredos (caso das contas de
+laboratório, abaixo).
 
 ### Auditoria
 
@@ -184,23 +184,23 @@ existir uma trilha (a segunda trilha de eventos de gerenciamento é cobrada).
 | Variable | `AWS_ROLE_ARN` | Output `PapelDeployGitHubArn` |
 | Variable | `AWS_CFN_EXEC_ROLE_ARN` | Output `PapelExecucaoCloudFormationArn` |
 | Variable | `AWS_ARTIFACTS_BUCKET` | Output `BucketArtefatosNome` |
-| Secret | `EMAIL_ADMINISTRADOR` | E-mail dos avisos e do relatório (já existe) |
+| Secret | `EMAIL_ADMINISTRADOR` | E-mail dos avisos e do relatório |
 | Secret (opcional) | `EMAIL_ALERTAS` | E-mail dos alarmes técnicos |
 | Variable (opcional) | `LIMITE_ORCAMENTO_USD` | Limite do orçamento mensal (padrão 10) |
 | Variable (opcional) | `AWS_REGION` | Região (padrão `us-east-1`) |
 
-Depois do primeiro deploy por OIDC, apague os segredos `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY`.
+Nenhuma chave da AWS é cadastrada no GitHub: com essas variables o workflow usa só o OIDC.
 
 ### 3. Passos manuais (não dá para fazer por código)
 
-- [ ] **MFA na conta raiz:** console > nome da conta > *Security credentials* > *Assign MFA device*.
-- [ ] **Usuários nominais:** criar um usuário IAM por integrante (Igor, Caio, Luciano), com acesso ao console, no grupo `plataforma-feedback-equipe`; cada um cadastra o próprio MFA no primeiro login.
-- [ ] **Confirmar as assinaturas** de e-mail do tópico de notificações e do tópico de alarmes.
-- [ ] **Tags de custo:** Billing > *Cost allocation tags* > ativar `Projeto` e `Ambiente` (para filtrar o gasto por projeto no Cost Explorer).
-- [ ] **Teste final:** `./scripts/forcar-erro.sh` gera o e-mail de alarme e `./scripts/verificar-permissoes.sh` mostra os acessos negados.
+- **MFA na conta raiz:** console > nome da conta > *Security credentials* > *Assign MFA device*.
+- **Usuários nominais:** criar um usuário IAM por integrante (Igor, Caio, Luciano), com acesso ao console, no grupo `plataforma-feedback-equipe`; cada um cadastra o próprio MFA no primeiro login.
+- **Confirmar as assinaturas** de e-mail do tópico de notificações e do tópico de alarmes.
+- **Tags de custo:** Billing > *Cost allocation tags* > ativar `Projeto` e `Ambiente` (para filtrar o gasto por projeto no Cost Explorer).
+- **Teste final:** `./scripts/forcar-erro.sh` gera o e-mail de alarme e `./scripts/verificar-permissoes.sh` mostra os acessos negados.
 
-## Observações para o primeiro deploy
+## Conta de laboratório (AWS Academy)
 
-- **A URL da API muda uma vez:** a API passou a ser declarada explicitamente (`ApiAvaliacoes`) para ter throttling e log de acesso. Pegue a nova URL no output `ApiUrl` e atualize o `requests.http`/Postman.
-- **Logs antigos:** os grupos `/aws/lambda/<função>` criados antes deste bloco não são mais usados e não pertencem à pilha; podem ser apagados no console.
-- **Conta de laboratório (AWS Academy):** criação de papéis IAM, OIDC, CloudTrail e orçamento costuma ser bloqueada. Nesse caso use `LimiteOrcamentoMensalUsd=0` e não implante o `infra/conta.yaml`.
+Nessas contas a criação de papéis IAM, do provedor OIDC, do CloudTrail e do orçamento costuma ser bloqueada.
+Nesse caso use `LimiteOrcamentoMensalUsd=0`, não implante o `infra/conta.yaml` e, para o deploy pelo Actions,
+cadastre os secrets `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` de um usuário de deploy no lugar das variables do OIDC.
