@@ -168,7 +168,7 @@ aws cloudformation deploy \
   --template-file infra/conta.yaml \
   --stack-name plataforma-feedback-conta \
   --capabilities CAPABILITY_NAMED_IAM \
-  --parameter-overrides RepositorioGitHub=Igolbr/cloud-tech-challenge_fase_4
+  --parameter-overrides RepositorioGitHub=postech-adjt-equipe1/cloud-tech-challenge_fase_4
 
 aws cloudformation describe-stacks --stack-name plataforma-feedback-conta \
   --query "Stacks[0].Outputs" --output table

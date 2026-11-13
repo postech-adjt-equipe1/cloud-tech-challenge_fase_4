@@ -12,7 +12,7 @@ Description: >
 Parameters:
   RepositorioGitHub:
     Type: String
-    Default: Igolbr/cloud-tech-challenge_fase_4
+    Default: postech-adjt-equipe1/cloud-tech-challenge_fase_4
     Description: Repositório (dono/nome) autorizado a implantar pela AWS.
     AllowedPattern: "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
   AmbienteGitHub:
@@ -191,10 +191,20 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              # Repositórios novos do GitHub mandam o "sub" com os IDs da organização e do
+              # repositório (repo:dono@123/nome@456:...); os antigos, sem os IDs.
               StringLike:
                 token.actions.githubusercontent.com:sub:
                   - !Sub "repo:${RepositorioGitHub}:environment:${AmbienteGitHub}"
                   - !Sub "repo:${RepositorioGitHub}:ref:refs/heads/main"
+                  - !Sub
+                    - "repo:${Dono}@*/${Nome}@*:environment:${AmbienteGitHub}"
+                    - Dono: !Select [0, !Split ["/", !Ref RepositorioGitHub]]
+                      Nome: !Select [1, !Split ["/", !Ref RepositorioGitHub]]
+                  - !Sub
+                    - "repo:${Dono}@*/${Nome}@*:ref:refs/heads/main"
+                    - Dono: !Select [0, !Split ["/", !Ref RepositorioGitHub]]
+                      Nome: !Select [1, !Split ["/", !Ref RepositorioGitHub]]
       Policies:
         - PolicyName: sam-deploy
           PolicyDocument:
