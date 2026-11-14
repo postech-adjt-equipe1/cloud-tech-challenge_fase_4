@@ -15,14 +15,6 @@ import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Função receber-avaliacao.
- *
- * <p>Responsabilidade única: validar e gravar a avaliação recebida em {@code POST /avaliacao}.
- * Responde 201 com a avaliação criada, 400 em caso de dados inválidos ou 500 em falha inesperada.
- *
- * <p>Variáveis de ambiente: {@code TABELA_AVALIACOES} e {@code FUSO_HORARIO}.
- */
 public class ReceberAvaliacaoHandler implements RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -30,7 +22,6 @@ public class ReceberAvaliacaoHandler implements RequestHandler<APIGatewayV2HTTPE
     private final ValidadorAvaliacao validador;
     private final AvaliacaoRepository repository;
 
-    /** Construtor usado pelo runtime da Lambda: clientes criados uma vez e reaproveitados entre invocações. */
     public ReceberAvaliacaoHandler() {
         this(
                 new ValidadorAvaliacao(MAPPER, ZoneId.of(env("FUSO_HORARIO", "America/Sao_Paulo"))),
@@ -57,9 +48,7 @@ public class ReceberAvaliacaoHandler implements RequestHandler<APIGatewayV2HTTPE
         try {
             repository.salvar(avaliacao);
         } catch (RuntimeException e) {
-            // O texto "Falha ao gravar" alimenta a métrica FalhasGravacaoDynamoDB (template.yaml)
             log(context, "Falha ao gravar avaliação " + avaliacao.id() + ": " + e);
-            // Relança para a Lambda registrar o erro (métrica Errors) e a API responder 500
             throw e;
         }
 

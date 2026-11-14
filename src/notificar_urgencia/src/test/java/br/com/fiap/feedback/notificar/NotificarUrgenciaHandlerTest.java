@@ -33,7 +33,6 @@ class NotificarUrgenciaHandlerTest {
         String mensagem = enviados.get(0).mensagem();
         assertTrue(mensagem.contains("Descrição: Professor não apareceu"));
         assertTrue(mensagem.contains("Urgência: CRITICA"));
-        // 2026-10-06T15:00Z = 12:00 em São Paulo
         assertTrue(mensagem.contains("Data de envio: 06/10/2026 12:00:00"));
     }
 

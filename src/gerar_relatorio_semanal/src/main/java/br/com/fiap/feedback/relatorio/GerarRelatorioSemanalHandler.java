@@ -13,15 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Função gerar-relatorio-semanal.
- *
- * <p>Responsabilidade única: consolidar as avaliações da semana e enviar o relatório por e-mail.
- * Acionada pelo EventBridge Scheduler uma vez por semana. O período são os 7 dias completos
- * anteriores ao dia da execução (ex.: executando na segunda, cobre de segunda a domingo anteriores).
- *
- * <p>Variáveis de ambiente: {@code TABELA_AVALIACOES}, {@code TOPICO_RELATORIO_ARN} e {@code FUSO_HORARIO}.
- */
 public class GerarRelatorioSemanalHandler implements RequestHandler<Map<String, Object>, String> {
 
     static final int DIAS_DO_RELATORIO = 7;

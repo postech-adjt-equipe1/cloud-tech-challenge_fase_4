@@ -32,7 +32,6 @@ class FormatadorRelatorioTest {
         assertTrue(mensagem.contains("29/09/2026: 0"));
         assertTrue(mensagem.contains("CRITICA: 1"));
         assertTrue(mensagem.contains("MEDIA: 0"));
-        // descrição | urgência | data de envio (15:00 UTC = 12:00 em São Paulo)
         assertTrue(mensagem.contains("Avaliação b | CRITICA | 30/09/2026 12:00"));
     }
 

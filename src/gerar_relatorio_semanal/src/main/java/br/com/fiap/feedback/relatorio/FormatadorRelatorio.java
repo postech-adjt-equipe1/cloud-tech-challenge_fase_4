@@ -4,13 +4,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/** Gera o texto do e-mail do relatório semanal. */
 public class FormatadorRelatorio {
 
-    /**
-     * Limite de avaliações listadas individualmente. O SNS aceita mensagens de até 256 KB;
-     * acima do limite a lista é truncada, mas média e contagens continuam considerando todas.
-     */
     public static final int LIMITE_AVALIACOES_LISTADAS = 100;
 
     private static final DateTimeFormatter DIA = DateTimeFormatter.ofPattern("dd/MM/yyyy");

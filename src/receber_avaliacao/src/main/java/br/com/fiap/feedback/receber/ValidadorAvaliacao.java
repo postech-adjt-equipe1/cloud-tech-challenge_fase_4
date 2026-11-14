@@ -12,13 +12,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-/**
- * Converte o corpo JSON de {@code POST /avaliacao} em uma {@link Avaliacao}.
- *
- * <p>Regras: {@code descricao} é texto não vazio (até 2000 caracteres) e {@code nota}
- * é um número inteiro de 0 a 10. Qualquer violação gera {@link ValidacaoException}
- * com a lista de erros encontrados.
- */
 public class ValidadorAvaliacao {
 
     private final ObjectMapper mapper;
@@ -96,7 +89,6 @@ public class ValidadorAvaliacao {
             erros.add("O campo 'nota' é obrigatório");
             return null;
         }
-        // isInt() rejeita textos ("7"), decimais (7.5 ou 7.0) e valores fora do range de int
         if (!campo.isInt()) {
             erros.add("O campo 'nota' deve ser um número inteiro");
             return null;

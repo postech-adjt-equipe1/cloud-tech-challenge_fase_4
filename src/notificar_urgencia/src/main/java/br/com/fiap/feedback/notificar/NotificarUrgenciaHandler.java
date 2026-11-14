@@ -12,18 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Função notificar-urgencia.
- *
- * <p>Responsabilidade única: avisar os administradores sobre avaliações críticas.
- * É acionada pelo DynamoDB Streams a cada nova avaliação gravada; o template já filtra
- * apenas inserções com urgência CRITICA, e a função confere novamente por segurança.
- *
- * <p>Usa "partial batch response": se o envio de um registro falhar, só ele (e os seguintes)
- * são reprocessados, evitando e-mails duplicados para os que já foram enviados.
- *
- * <p>Variáveis de ambiente: {@code TOPICO_ALERTA_ARN} e {@code FUSO_HORARIO}.
- */
 public class NotificarUrgenciaHandler implements RequestHandler<DynamodbEvent, StreamsEventResponse> {
 
     private final Notificador notificador;
@@ -61,9 +49,7 @@ public class NotificarUrgenciaHandler implements RequestHandler<DynamodbEvent, S
                 notificador.enviar(alerta.get().assunto(), alerta.get().mensagem(fusoHorario));
                 log(context, "Alerta enviado para a avaliação " + alerta.get().id());
             } catch (RuntimeException e) {
-                // O texto "Falha ao processar registro" alimenta a métrica FalhasEnvioAlertaUrgencia (template.yaml)
                 log(context, "Falha ao processar registro " + registro.getEventID() + ": " + e);
-                // Em streams, a Lambda retoma a partir do primeiro registro com falha
                 falhas.add(new StreamsEventResponse.BatchItemFailure(registro.getDynamodb().getSequenceNumber()));
                 break;
             }

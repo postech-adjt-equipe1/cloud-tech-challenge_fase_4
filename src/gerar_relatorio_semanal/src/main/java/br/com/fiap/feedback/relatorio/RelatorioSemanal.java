@@ -9,10 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Consolidação das avaliações de um período: média das notas, quantidade por dia
- * e quantidade por urgência, além da lista de avaliações (descrição, urgência e data).
- */
 public record RelatorioSemanal(
         LocalDate inicio,
         LocalDate fim,
@@ -21,13 +17,8 @@ public record RelatorioSemanal(
         Map<LocalDate, Long> quantidadePorDia,
         Map<String, Long> quantidadePorUrgencia) {
 
-    /** Ordem de exibição das urgências (da mais grave para a menos grave). */
     public static final List<String> URGENCIAS = List.of("CRITICA", "MEDIA", "BAIXA");
 
-    /**
-     * Calcula o relatório do período [inicio, fim], ambos inclusivos.
-     * Dias e urgências sem avaliações aparecem com quantidade zero.
-     */
     public static RelatorioSemanal calcular(LocalDate inicio, LocalDate fim, List<AvaliacaoRegistrada> avaliacoes) {
         List<AvaliacaoRegistrada> ordenadas = avaliacoes.stream()
                 .sorted(Comparator.comparing(AvaliacaoRegistrada::dataEnvio))

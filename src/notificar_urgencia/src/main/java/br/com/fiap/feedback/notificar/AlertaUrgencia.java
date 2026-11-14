@@ -8,19 +8,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Dados enviados no e-mail de aviso de urgência: descrição, urgência e data de envio.
- */
 public record AlertaUrgencia(String id, String descricao, String urgencia, Instant dataEnvio) {
 
     public static final String URGENCIA_CRITICA = "CRITICA";
 
     private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-    /**
-     * Monta o alerta a partir da imagem nova do item no DynamoDB Streams.
-     * Retorna vazio quando a avaliação não é crítica.
-     */
     public static Optional<AlertaUrgencia> deItem(Map<String, AttributeValue> item) {
         if (item == null || !URGENCIA_CRITICA.equals(texto(item, "urgencia"))) {
             return Optional.empty();

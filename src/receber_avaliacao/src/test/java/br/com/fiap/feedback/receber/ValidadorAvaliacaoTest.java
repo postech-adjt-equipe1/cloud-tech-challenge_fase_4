@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidadorAvaliacaoTest {
 
-    // 02:30 UTC de 06/10 ainda é 05/10 em São Paulo (UTC-3)
     private static final Instant AGORA = Instant.parse("2026-10-06T02:30:00Z");
 
     private final ValidadorAvaliacao validador = new ValidadorAvaliacao(

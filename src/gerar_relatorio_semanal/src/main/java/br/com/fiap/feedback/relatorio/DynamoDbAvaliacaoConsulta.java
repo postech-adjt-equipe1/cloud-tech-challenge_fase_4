@@ -9,12 +9,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Consulta as avaliações de um dia pelo índice secundário {@code por-dia}
- * (chave de partição {@code dia}, ordenação {@code dataEnvio}).
- *
- * <p>Usar Query no índice evita varrer a tabela inteira (Scan) a cada relatório.
- */
 public class DynamoDbAvaliacaoConsulta implements AvaliacaoConsulta {
 
     public static final String INDICE_POR_DIA = "por-dia";
@@ -36,7 +30,6 @@ public class DynamoDbAvaliacaoConsulta implements AvaliacaoConsulta {
                 .expressionAttributeValues(Map.of(":dia", AttributeValue.fromS(dia.toString())))
                 .build();
 
-        // O paginator busca automaticamente as próximas páginas (limite de 1 MB por página)
         return dynamoDb.queryPaginator(consulta).items().stream()
                 .map(DynamoDbAvaliacaoConsulta::converter)
                 .toList();

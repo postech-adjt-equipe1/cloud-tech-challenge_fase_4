@@ -1,11 +1,5 @@
 package br.com.fiap.feedback.receber;
 
-/**
- * Nível de urgência de uma avaliação, derivado da nota.
- *
- * <p>Regra: nota 0 a 3 = CRITICA, 4 a 6 = MEDIA, 7 a 10 = BAIXA.
- * Somente avaliações CRITICA disparam o e-mail de aviso aos administradores.
- */
 public enum Urgencia {
     CRITICA,
     MEDIA,

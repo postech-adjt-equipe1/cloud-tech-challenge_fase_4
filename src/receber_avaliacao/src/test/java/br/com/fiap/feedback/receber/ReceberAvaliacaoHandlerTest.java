@@ -72,7 +72,6 @@ class ReceberAvaliacaoHandlerTest {
                 () -> comFalha.handleRequest(evento("{\"descricao\":\"x\",\"nota\":5}"), null));
     }
 
-    /** Comportamento usado por scripts/forcar-erro.sh para disparar o alarme de erros. */
     @Test
     void falhaComBase64Invalido() {
         APIGatewayV2HTTPEvent evento = evento("%%% erro forçado %%%");

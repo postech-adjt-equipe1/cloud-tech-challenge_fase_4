@@ -22,7 +22,6 @@ class RelatorioSemanalTest {
                 avaliacao("b", 2, "CRITICA", "2026-09-28"),
                 avaliacao("c", 5, "MEDIA", "2026-10-01")));
 
-        // (10 + 2 + 5) / 3 = 5,666... -> 5,67
         assertEquals(new BigDecimal("5.67"), relatorio.media().orElseThrow());
         assertEquals(3, relatorio.total());
     }

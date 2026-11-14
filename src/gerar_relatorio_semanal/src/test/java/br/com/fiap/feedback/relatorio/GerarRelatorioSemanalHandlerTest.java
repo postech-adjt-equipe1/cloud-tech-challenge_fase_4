@@ -28,7 +28,6 @@ class GerarRelatorioSemanalHandlerTest {
                     : List.of();
         };
 
-        // Segunda-feira, 05/10/2026 às 08:00 em São Paulo
         Clock clock = Clock.fixed(Instant.parse("2026-10-05T11:00:00Z"), ZoneOffset.UTC);
         GerarRelatorioSemanalHandler handler = new GerarRelatorioSemanalHandler(
                 consulta, (assunto, mensagem) -> mensagens.add(assunto + "\n" + mensagem),

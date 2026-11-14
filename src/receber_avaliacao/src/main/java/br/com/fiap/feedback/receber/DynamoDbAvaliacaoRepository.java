@@ -6,13 +6,6 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 
 import java.util.Map;
 
-/**
- * Grava a avaliação na tabela DynamoDB.
- *
- * <p>Atributos: {@code id} (chave), {@code descricao}, {@code nota}, {@code urgencia},
- * {@code dataEnvio} (ISO-8601 em UTC) e {@code dia} (yyyy-MM-dd, chave do índice por dia).
- * A gravação dispara o DynamoDB Streams, que aciona a função notificar-urgencia.
- */
 public class DynamoDbAvaliacaoRepository implements AvaliacaoRepository {
 
     private final DynamoDbClient dynamoDb;
@@ -36,7 +29,6 @@ public class DynamoDbAvaliacaoRepository implements AvaliacaoRepository {
         dynamoDb.putItem(PutItemRequest.builder()
                 .tableName(nomeTabela)
                 .item(item)
-                // Garante que um id repetido nunca sobrescreva uma avaliação existente
                 .conditionExpression("attribute_not_exists(id)")
                 .build());
     }
