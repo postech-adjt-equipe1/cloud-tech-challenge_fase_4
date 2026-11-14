@@ -9,8 +9,7 @@ sozinho pelo GitHub Actions a cada push na `main`.
 
 **Vídeo de demonstração:** _link a ser adicionado_
 
-**Grupo:** Igor (funções, IaC e pipeline), Caio (monitoramento e segurança) e Luciano (autenticação,
-documentação e vídeo).
+**Grupo:** Igor, Caio e Luciano.
 
 ## Sumário
 
@@ -41,6 +40,12 @@ no draw.io e o arquivo editável é o [docs/arquitetura.drawio](docs/arquitetura
 3. A `receber-avaliacao` valida o corpo, calcula a urgência pela nota e grava o item no DynamoDB. O aluno recebe `201` na hora.
 4. A gravação gera um evento no DynamoDB Streams. Se a urgência for `CRITICA`, o evento aciona a `notificar-urgencia`, que publica o aviso no SNS e o administrador recebe o e-mail.
 5. Toda segunda-feira às 08:00 o EventBridge Scheduler aciona a `gerar-relatorio-semanal`, que lê as avaliações dos 7 dias anteriores e envia o relatório pelo mesmo tópico.
+   A leitura usa o índice secundário `por-dia` da tabela (seta "Query (índice por-dia)" no diagrama). A chave
+   principal da tabela é o `id` da avaliação, que não serve para buscar por data; sem o índice, a função teria
+   que fazer um Scan, lendo a tabela inteira a cada relatório. Por isso cada avaliação é gravada com o campo
+   `dia` (`yyyy-MM-dd`), que é a chave do índice, e a função faz 7 consultas (Query), uma para cada dia,
+   lendo só as avaliações da semana. O custo e o tempo do relatório dependem do volume da semana, e não
+   do tamanho total da tabela.
 6. O CloudWatch acompanha as três funções e a API. Quando algo dá errado, um alarme manda e-mail por um tópico SNS separado.
 
 Como o aviso de urgência é disparado pelo Streams, e não pela própria `receber-avaliacao`, uma falha no
