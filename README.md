@@ -7,7 +7,7 @@ além de um relatório semanal com a média das notas.
 A infraestrutura toda está em código ([template.yaml](template.yaml), AWS SAM) e o deploy roda
 sozinho pelo GitHub Actions a cada push na `main`.
 
-**Vídeo de demonstração:** _link a ser adicionado_
+**Vídeo de demonstração:** https://drive.google.com/file/d/1zCJdiyrkua3b6bHrwy8UHtOxj8WUKRgP/view
 
 **Grupo:** Igor, Caio e Luciano.
 
