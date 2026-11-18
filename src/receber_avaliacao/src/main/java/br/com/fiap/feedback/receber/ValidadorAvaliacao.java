@@ -4,33 +4,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 public class ValidadorAvaliacao {
 
     private final ObjectMapper mapper;
-    private final Clock clock;
-    private final ZoneId fusoHorario;
-    private final Supplier<String> geradorId;
 
-    public ValidadorAvaliacao(ObjectMapper mapper, Clock clock, ZoneId fusoHorario, Supplier<String> geradorId) {
+    public ValidadorAvaliacao(ObjectMapper mapper) {
         this.mapper = mapper;
-        this.clock = clock;
-        this.fusoHorario = fusoHorario;
-        this.geradorId = geradorId;
     }
 
-    public ValidadorAvaliacao(ObjectMapper mapper, ZoneId fusoHorario) {
-        this(mapper, Clock.systemUTC(), fusoHorario, () -> UUID.randomUUID().toString());
-    }
-
-    public Avaliacao validar(String corpo) {
+    public DadosAvaliacao validar(String corpo) {
         if (corpo == null || corpo.isBlank()) {
             throw new ValidacaoException(List.of("O corpo da requisição é obrigatório"));
         }
@@ -52,14 +37,7 @@ public class ValidadorAvaliacao {
             throw new ValidacaoException(erros);
         }
 
-        Instant agora = clock.instant();
-        return new Avaliacao(
-                geradorId.get(),
-                descricao,
-                nota,
-                Urgencia.classificar(nota),
-                agora,
-                agora.atZone(fusoHorario).toLocalDate());
+        return new DadosAvaliacao(descricao, nota);
     }
 
     private static String validarDescricao(JsonNode campo, List<String> erros) {

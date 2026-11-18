@@ -5,41 +5,26 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidadorAvaliacaoTest {
 
-    private static final Instant AGORA = Instant.parse("2026-10-06T02:30:00Z");
-
-    private final ValidadorAvaliacao validador = new ValidadorAvaliacao(
-            new ObjectMapper(),
-            Clock.fixed(AGORA, ZoneOffset.UTC),
-            ZoneId.of("America/Sao_Paulo"),
-            () -> "id-fixo");
+    private final ValidadorAvaliacao validador = new ValidadorAvaliacao(new ObjectMapper());
 
     @Test
     void aceitaAvaliacaoValida() {
-        Avaliacao avaliacao = validador.validar("{\"descricao\":\"  Aula ótima  \",\"nota\":9}");
+        DadosAvaliacao dados = validador.validar("{\"descricao\":\"  Aula ótima  \",\"nota\":9}");
 
-        assertEquals("id-fixo", avaliacao.id());
-        assertEquals("Aula ótima", avaliacao.descricao());
-        assertEquals(9, avaliacao.nota());
-        assertEquals(Urgencia.BAIXA, avaliacao.urgencia());
-        assertEquals(AGORA, avaliacao.dataEnvio());
-        assertEquals(LocalDate.of(2026, 10, 5), avaliacao.dia());
+        assertEquals("Aula ótima", dados.descricao());
+        assertEquals(9, dados.nota());
     }
 
-    @Test
-    void calculaUrgenciaCritica() {
-        assertEquals(Urgencia.CRITICA, validador.validar("{\"descricao\":\"Áudio ruim\",\"nota\":0}").urgencia());
+    @ParameterizedTest
+    @ValueSource(ints = {0, 10})
+    void aceitaNotasNosLimites(int nota) {
+        assertEquals(nota, validador.validar("{\"descricao\":\"ok\",\"nota\":" + nota + "}").nota());
     }
 
     @ParameterizedTest

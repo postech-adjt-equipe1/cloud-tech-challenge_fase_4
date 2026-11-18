@@ -20,31 +20,35 @@ public class ReceberAvaliacaoHandler implements RequestHandler<APIGatewayV2HTTPE
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final ValidadorAvaliacao validador;
+    private final FabricaAvaliacao fabrica;
     private final AvaliacaoRepository repository;
 
     public ReceberAvaliacaoHandler() {
         this(
-                new ValidadorAvaliacao(MAPPER, ZoneId.of(env("FUSO_HORARIO", "America/Sao_Paulo"))),
+                new ValidadorAvaliacao(MAPPER),
+                new FabricaAvaliacao(ZoneId.of(env("FUSO_HORARIO", "America/Sao_Paulo"))),
                 new DynamoDbAvaliacaoRepository(
                         DynamoDbClient.builder().httpClient(UrlConnectionHttpClient.create()).build(),
                         env("TABELA_AVALIACOES", null)));
     }
 
-    public ReceberAvaliacaoHandler(ValidadorAvaliacao validador, AvaliacaoRepository repository) {
+    public ReceberAvaliacaoHandler(ValidadorAvaliacao validador, FabricaAvaliacao fabrica, AvaliacaoRepository repository) {
         this.validador = validador;
+        this.fabrica = fabrica;
         this.repository = repository;
     }
 
     @Override
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent evento, Context context) {
-        Avaliacao avaliacao;
+        DadosAvaliacao dados;
         try {
-            avaliacao = validador.validar(corpo(evento));
+            dados = validador.validar(corpo(evento));
         } catch (ValidacaoException e) {
             log(context, "Avaliação rejeitada: " + e.getMessage());
             return resposta(400, Map.of("erros", e.getErros()));
         }
 
+        Avaliacao avaliacao = fabrica.criar(dados);
         try {
             repository.salvar(avaliacao);
         } catch (RuntimeException e) {

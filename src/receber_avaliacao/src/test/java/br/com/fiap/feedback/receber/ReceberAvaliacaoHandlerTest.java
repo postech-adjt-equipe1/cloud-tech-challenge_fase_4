@@ -24,7 +24,8 @@ class ReceberAvaliacaoHandlerTest {
     private final ObjectMapper mapper = new ObjectMapper();
     private final List<Avaliacao> gravadas = new ArrayList<>();
     private final ReceberAvaliacaoHandler handler = new ReceberAvaliacaoHandler(
-            new ValidadorAvaliacao(mapper,
+            new ValidadorAvaliacao(mapper),
+            new FabricaAvaliacao(
                     Clock.fixed(Instant.parse("2026-10-06T15:00:00Z"), ZoneOffset.UTC),
                     ZoneId.of("America/Sao_Paulo"),
                     () -> "abc-123"),
@@ -65,7 +66,8 @@ class ReceberAvaliacaoHandlerTest {
     @Test
     void propagaFalhaDeGravacao() {
         ReceberAvaliacaoHandler comFalha = new ReceberAvaliacaoHandler(
-                new ValidadorAvaliacao(mapper, ZoneId.of("America/Sao_Paulo")),
+                new ValidadorAvaliacao(mapper),
+                new FabricaAvaliacao(ZoneId.of("America/Sao_Paulo")),
                 avaliacao -> { throw new IllegalStateException("DynamoDB indisponível"); });
 
         assertThrows(IllegalStateException.class,
