@@ -128,6 +128,27 @@ umas às outras; a comunicação é feita pelos eventos da AWS (API Gateway, Dyn
 
 Nos nomes reais das funções aparece o ambiente no final (ex.: `receber-avaliacao-dev`).
 
+### Organização do código
+
+Dentro de cada função, cada classe faz uma coisa só. O handler apenas recebe o evento e coordena as outras classes:
+
+| Função | Classes |
+|---|---|
+| `receber-avaliacao` | `ReceberAvaliacaoHandler` (coordena), `ValidadorAvaliacao` (valida o JSON e devolve `DadosAvaliacao`), `FabricaAvaliacao` (gera id, data de envio, dia e urgência), `Urgencia` (regra da nota), `AvaliacaoRepository` / `DynamoDbAvaliacaoRepository` (gravação) |
+| `notificar-urgencia` | `NotificarUrgenciaHandler` (coordena), `AlertaUrgencia` (lê o registro do stream e monta o e-mail), `Notificador` / `SnsNotificador` (envio) |
+| `gerar-relatorio-semanal` | `GerarRelatorioSemanalHandler` (coordena), `RelatorioSemanal` (calcula média e contagens), `FormatadorRelatorio` (monta o e-mail), `AvaliacaoConsulta` / `DynamoDbAvaliacaoConsulta` (consulta), `Notificador` / `SnsNotificador` (envio) |
+
+O acesso à AWS fica atrás das interfaces (`AvaliacaoRepository`, `AvaliacaoConsulta` e `Notificador`), e por isso
+os testes trocam o DynamoDB e o SNS por implementações em memória.
+
+**Por que algumas classes se repetem entre as funções.** A interface `Notificador`, a classe `SnsNotificador` e
+o método que lê as variáveis de ambiente aparecem em mais de uma função. Foi uma escolha consciente. Cada função
+é um projeto Maven independente e vira um pacote próprio no Lambda; o `sam build` compila cada `CodeUri`
+separadamente. Para compartilhar esse código seria preciso publicar um jar comum ou criar uma Lambda Layer, e aí
+uma mudança na parte comum obrigaria a reconstruir e reimplantar as três funções juntas. Como o trecho repetido é
+pequeno (uma interface e uma classe de cerca de 20 linhas), preferimos manter as funções independentes: cada uma
+pode ser alterada, testada e implantada sem afetar as outras, e cada pacote leva só as dependências que usa.
+
 ### receber-avaliacao
 
 - **Responsabilidade:** validar e gravar a avaliação.
